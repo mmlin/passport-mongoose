@@ -1,0 +1,41 @@
+{
+  "name": "passport-mongoose",
+  "version": "0.0.1",
+  "description": "MongoDB username and password authentication strategy for Passport using Mongoose.",
+  "author": {
+    "name": "Mike M. Lin",
+    "email": "mike.m.lin@gmail.com",
+    "url": "http://www.seemikecode.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mmlin/passport-mongoose.git"
+  },
+  "bugs": {
+    "url": "http://github.com/mmlin/passport-mongoose/issues"
+  },
+  "main": "./index.js",
+  "dependencies": {
+    "pkginfo": "0.2.x",
+    "passport": "~0.1.1",
+    "mongoose": "3.x"
+  },
+  "engines": {
+    "node": ">= 0.4.0"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/MIT"
+    }
+  ],
+  "keywords": [
+    "passport",
+    "mongoose",
+    "mongodb",
+    "mongo",
+    "auth",
+    "authn",
+    "authentication"
+  ]
+}

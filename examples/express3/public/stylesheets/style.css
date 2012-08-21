@@ -1,0 +1,21 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#login-form .error {
+  color: #900;
+}
+
+#login-form label {
+  display: block;
+}
+
+#login-form input[type=text], #login-form input[type=password] {
+  padding: 5px;
+  width: 200px;
+}

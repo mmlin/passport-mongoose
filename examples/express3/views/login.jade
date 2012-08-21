@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  h1 Sign In
+  
+  form#login-form(method='POST')
+  
+    if typeof(error) != 'undefined'
+      p.error= error
+  
+    p
+      label(for='username') Username
+      input#username(name='username', type='text')
+    
+    p  
+      label(for='password') Password
+      input#password(name='password', type='password')
+    
+    p
+      input(type='submit')

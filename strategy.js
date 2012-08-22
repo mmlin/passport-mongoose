@@ -4,7 +4,8 @@
 var passport = require('passport')
   , util = require('util')
   , BadRequestError = require('./errors/badrequesterror')
-  , mongoose = require('mongoose');
+  , mongoose = require('mongoose')
+  , crypto = require('crypto');
 
 /**
  * `Strategy` constructor.
@@ -77,10 +78,12 @@ Strategy.prototype._verify = function(username, password, done) {
   
   var usernameField = this._usernameField;
   var passwordField = this._passwordField;
+  var saltField = this._saltField;
   var query = {};
   
   query[usernameField] = username;
   
+  var strategy = this;
   this._model.findOne(query, function(err, user) {
   
     // Something went terribly wrong.
@@ -91,12 +94,18 @@ Strategy.prototype._verify = function(username, password, done) {
     if (!user)
       return done(null, false, { message: 'User not found' });
     
-    // The password isn't correct.
-    if (user[passwordField] != password)
-      return done(null, false, { message: 'Bad password' });
-    
-    // Everything looks good.
-    return done(null, user);
+    var hashedPassword = user[passwordField];
+    var salt = user[saltField];
+    strategy.hashPassword(password, salt, function(err, derivedKey) {
+      if (err) return done(err);
+      
+      // If the password isn't correct.
+      if (derivedKey != hashedPassword)
+        return done(null, false, { message: 'Bad password' });
+      
+      // Everything looks good.
+      return done(null, user);
+    });
   });
 };
 
@@ -140,6 +149,61 @@ Strategy.prototype.authenticate = function(req, options) {
     }
     return null;
   }
+};
+
+/**
+ * Create a user with a given password.
+ *
+ * @param {String} username
+ * @param {String} password
+ * @param {Function} done(err, user)
+ */
+Strategy.prototype.createUser = function(username, password, done) {
+  var user = new this._model();
+  user[this._usernameField] = username;
+  var salt = this.generateSalt();
+  var strategy = this;
+  this.hashPassword(password, salt, function(err, derivedKey) {
+    if (err) return done(err);
+    var user = new strategy._model();
+    user[strategy._usernameField] = username;
+    user[strategy._passwordField] = derivedKey;
+    user[strategy._saltField] = salt;
+    user.save(function(err) { done(err); });
+    done(null, user);
+  });
+};
+
+/**
+ * Generate a salt with a given length.
+ *
+ * @param {Integer} length of the salt (defaults to 128)
+ */
+Strategy.prototype.generateSalt = function(len) {
+  var set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  var setLen = set.length;
+  var salt = '';
+  
+  len || (len = 128);
+  
+  for (var i = 0; i < len; i++) {
+    var p = Math.floor(Math.random() * setLen);
+    salt += set[p];
+  }
+  return salt;
+};
+
+/**
+ * Hash a password with a given salt.
+ *
+ * @param {String} password in plain-text
+ * @param {String} salt
+ * @param {Function} done(err, derivedKey)
+ */
+Strategy.prototype.hashPassword = function(password, salt, done) {
+  var iterations = 10000;
+  var keylen = 128;
+  crypto.pbkdf2(password, salt, iterations, keylen, done);
 };
 
 
